@@ -8,7 +8,7 @@ services:
     depends_on:
       - backend
     environment:
-      - VITE_API_URL=${VITE_API_URL}
+      - VITE_API_URL=http://stomtest.nsmu.ru:5000
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -22,14 +22,14 @@ services:
     depends_on:
       - mariadb
     environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - NODE_ENV=${NODE_ENV}
-      - PORT=${PORT}
-      - HOST=${HOST}
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_NAME=quizz_db
+      - DB_USER=quizz_user
+      - DB_PASSWORD=quizz_password123
+      - NODE_ENV=development
+      - PORT=5000
+      - HOST=stomtest.nsmu.ru
     restart: always
     volumes:
       - ./backend/src:/app/src
@@ -40,10 +40,10 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=admin123
+      - MYSQL_DATABASE=quizz_db
+      - MYSQL_USER=quizz_user
+      - MYSQL_PASSWORD=quizz_password123
     volumes:
       - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
       - mariadb_data:/var/lib/mysql
