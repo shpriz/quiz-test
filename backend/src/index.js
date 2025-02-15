@@ -15,7 +15,7 @@ const fastify = Fastify({
 
 // Регистрируем плагины
 await fastify.register(cors, {
-  origin: ['http://localhost:5173', 'http://localhost:5000'],
+  origin: ['http://stomtest.nsmu.ru:5173', 'http://stomtest.nsmu.ru:5000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 });
