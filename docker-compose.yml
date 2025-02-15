@@ -32,7 +32,7 @@ services:
       - HOST=${HOST}
     restart: always
     volumes:
-      - ./backend:/app
+      - ./backend/src:/app/src
       - /app/node_modules
 
   mariadb:
