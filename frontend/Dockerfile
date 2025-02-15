@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:20.11.0-alpine AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build
 
 # Настраиваем nginx
-FROM nginx:alpine
+FROM nginx:stable-alpine
 
 # Копируем собранное приложение
 COPY --from=builder /app/dist /usr/share/nginx/html
