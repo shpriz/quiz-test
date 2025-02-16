@@ -16,6 +16,9 @@ services:
       - "80:80"
     volumes:
       - ./frontend/nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - frontend
+      - backend
     networks:
       - app-network
 
