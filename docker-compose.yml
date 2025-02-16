@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   frontend:
     build: 
@@ -5,13 +7,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5173:5173"
-    depends_on:
-      - backend
     environment:
       - VITE_API_URL=http://stomtest.nsmu.ru:5000
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+    restart: always
 
   backend:
     build: 
@@ -19,35 +17,36 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
-    depends_on:
-      - mariadb
     environment:
       - DB_HOST=mariadb
       - DB_PORT=3306
       - DB_NAME=quizz_db
       - DB_USER=quizz_user
       - DB_PASSWORD=quizz_password123
-      - NODE_ENV=development
       - PORT=5000
       - HOST=stomtest.nsmu.ru
     restart: always
-    volumes:
-      - ./backend/src:/app/src
-      - /app/node_modules
+    depends_on:
+      mariadb:
+        condition: service_healthy
 
   mariadb:
     image: mariadb:10.6
-    ports:
-      - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=admin123
+      - MYSQL_ROOT_PASSWORD=rootpassword123
       - MYSQL_DATABASE=quizz_db
       - MYSQL_USER=quizz_user
       - MYSQL_PASSWORD=quizz_password123
+    ports:
+      - "3306:3306"
     volumes:
-      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
       - mariadb_data:/var/lib/mysql
-    restart: always
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mariadb_data:

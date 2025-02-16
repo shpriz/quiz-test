@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Section, QuizResult } from '../types/quiz';
+import { Section, QuizResult, AdminCredentials, AdminAuthResponse, UserResult } from '../types/quiz';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -10,6 +10,16 @@ const api = axios.create({
   },
 });
 
+// Добавляем токен к запросам, если он есть
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('adminToken');
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// API для теста
 export const fetchSections = () => 
   api.get<Section[]>('/quiz/sections').then(res => res.data);
 
@@ -18,3 +28,23 @@ export const saveResult = (data: QuizResult & {
   lastName: string; 
 }) => 
   api.post('/results', data).then(res => res.data);
+
+// API для админки
+export const adminLogin = (credentials: AdminCredentials) =>
+  api.post<AdminAuthResponse>('/admin/login', credentials).then(res => res.data);
+
+export const fetchResults = () =>
+  api.get<UserResult[]>('/admin/results').then(res => res.data);
+
+export const downloadResultsExcel = () =>
+  api.get('/admin/results/download', { 
+    responseType: 'blob' 
+  }).then(response => {
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'quiz-results.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  });

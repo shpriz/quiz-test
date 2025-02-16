@@ -6,6 +6,7 @@ import { sequelize } from './config/database.js';
 import routes from './routes/index.js';
 import { importQuizData } from './utils/importQuizData.js';
 import { initializeAdmin } from './controllers/authController.js';
+import adminRoutes from './routes/admin.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ await fastify.register(jwt, {
 
 // Регистрируем маршруты
 await fastify.register(routes);
+await fastify.register(adminRoutes, { prefix: '/api' });
 
 // Подключение к базе данных
 try {
@@ -45,9 +47,9 @@ try {
 const start = async () => {
   try {
     await fastify.listen({ 
-        port: process.env.PORT || 5173, 
-        host: process.env.HOST || 'stomtest.nsmu.ru' 
-      });
+      port: process.env.PORT || 5000, 
+      host: process.env.HOST || 'stomtest.nsmu.ru' 
+    });
     fastify.log.info(`Server running on port ${process.env.PORT || 5000}`);
     
     // Импортируем данные теста при запуске

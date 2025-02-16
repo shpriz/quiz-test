@@ -4,203 +4,145 @@ import {
   Container,
   Paper,
   Typography,
+  Button,
   RadioGroup,
   FormControlLabel,
   Radio,
-  Button,
   Box,
-  LinearProgress,
-  Alert
+  LinearProgress
 } from '@mui/material';
-import { QuizState } from '../../types/quiz';
 import { fetchSections, saveResult } from '../../api';
+import { Section, QuizState, QuizResult, DetailedAnswer, SectionScore } from '../../types/quiz';
 
-const Quiz = () => {
+export default function Quiz() {
   const navigate = useNavigate();
-  const [error, setError] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+  const [sections, setSections] = useState<Section[]>([]);
   const [quizState, setQuizState] = useState<QuizState>({
     currentSection: 0,
     currentQuestion: 0,
-    answers: {},
-    sections: []
+    answers: []
   });
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Проверяем, есть ли данные пользователя
   useEffect(() => {
     const userData = sessionStorage.getItem('userData');
     if (!userData) {
       navigate('/');
       return;
     }
+
+    loadSections();
   }, [navigate]);
 
-  // Загружаем вопросы теста
-  useEffect(() => {
-    const loadQuestions = async () => {
-      try {
-        const sections = await fetchSections();
-        setQuizState(prev => ({ ...prev, sections }));
-        setLoading(false);
-      } catch (err) {
-        setError('Ошибка при загрузке вопросов');
-        setLoading(false);
-      }
-    };
-
-    loadQuestions();
-  }, []);
-
-  const currentSection = quizState.sections[quizState.currentSection];
-  const currentQuestion = currentSection?.questions[quizState.currentQuestion];
-
-  const handleAnswer = (value: string) => {
-    setQuizState(prev => ({
-      ...prev,
-      answers: {
-        ...prev.answers,
-        [currentQuestion.id]: parseInt(value)
-      }
-    }));
+  const loadSections = async () => {
+    try {
+      const data = await fetchSections();
+      setSections(data);
+      setLoading(false);
+    } catch (err) {
+      setError('Ошибка загрузки вопросов');
+      setLoading(false);
+    }
   };
 
-  const handleNext = () => {
+  const currentSection = sections[quizState.currentSection];
+  const currentQuestion = currentSection?.questions[quizState.currentQuestion];
+  const totalQuestions = sections.reduce((sum, section) => sum + section.questions.length, 0);
+  const answeredQuestions = quizState.answers.length;
+
+  const handleAnswer = async () => {
+    if (selectedAnswer === null) return;
+
+    const newAnswers = [...quizState.answers, {
+      questionId: currentQuestion.id,
+      questionText: currentQuestion.text,
+      answerText: currentQuestion.answers[selectedAnswer].text,
+      score: currentQuestion.scores[selectedAnswer],
+      sectionTitle: currentSection.title
+    }];
+
     if (quizState.currentQuestion < currentSection.questions.length - 1) {
       // Следующий вопрос в текущей секции
       setQuizState(prev => ({
         ...prev,
-        currentQuestion: prev.currentQuestion + 1
+        currentQuestion: prev.currentQuestion + 1,
+        answers: newAnswers
       }));
-    } else if (quizState.currentSection < quizState.sections.length - 1) {
+    } else if (quizState.currentSection < sections.length - 1) {
       // Следующая секция
       setQuizState(prev => ({
         ...prev,
         currentSection: prev.currentSection + 1,
-        currentQuestion: 0
+        currentQuestion: 0,
+        answers: newAnswers
       }));
     } else {
       // Тест завершен
-      handleSubmit();
-    }
-  };
-
-  const handleSubmit = async () => {
-    try {
       const userData = JSON.parse(sessionStorage.getItem('userData') || '{}');
+      const result: QuizResult = calculateResult(newAnswers);
       
-      // Подсчитываем общий балл и баллы по секциям
-      let totalScore = 0;
-      const sectionScores = quizState.sections.map(section => {
-        let sectionScore = 0;
-        section.questions.forEach(question => {
-          const answerIndex = quizState.answers[question.id];
-          if (typeof answerIndex !== 'undefined') {
-            sectionScore += question.scores[answerIndex];
-            totalScore += question.scores[answerIndex];
-          }
+      try {
+        await saveResult({
+          ...result,
+          firstName: userData.firstName,
+          lastName: userData.lastName
         });
-        return {
-          sectionTitle: section.title,
-          score: sectionScore,
-          maxScore: section.questions.length * Math.max(...section.questions[0].scores)
-        };
-      });
-
-      // Формируем детальные ответы
-      const detailedAnswers = Object.entries(quizState.answers).map(([questionId, answerIndex]) => {
-        const question = quizState.sections
-          .flatMap(s => s.questions)
-          .find(q => q.id === parseInt(questionId));
-        
-        return {
-          questionId: parseInt(questionId),
-          questionText: question?.text || '',
-          answerText: question?.answers[answerIndex].text || '',
-          score: question?.scores[answerIndex] || 0,
-          sectionTitle: quizState.sections.find(s => 
-            s.questions.some(q => q.id === parseInt(questionId))
-          )?.title || ''
-        };
-      });
-
-      // Отправляем результаты
-      await saveResult({
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        totalScore,
-        sectionScores,
-        detailedAnswers
-      });
-
-      // Очищаем данные пользователя
-      sessionStorage.removeItem('userData');
-      
-      // Перенаправляем на страницу с результатами
-      navigate('/results', { 
-        state: { 
-          totalScore,
-          sectionScores,
-          detailedAnswers
-        }
-      });
-    } catch (err) {
-      setError('Ошибка при сохранении результатов');
+        navigate('/results', { state: { result } });
+      } catch (err) {
+        setError('Ошибка сохранения результатов');
+      }
     }
+
+    setSelectedAnswer(null);
   };
 
-  if (loading) {
-    return (
-      <Container maxWidth="md" sx={{ mt: 4 }}>
-        <LinearProgress />
-      </Container>
-    );
-  }
+  const calculateResult = (answers: DetailedAnswer[]): QuizResult => {
+    const sectionScores: SectionScore[] = sections.map(section => {
+      const sectionAnswers = answers.filter(a => a.sectionTitle === section.title);
+      const score = sectionAnswers.reduce((sum, a) => sum + a.score, 0);
+      const maxScore = section.questions.reduce((sum, q) => sum + Math.max(...q.scores), 0);
+      return { sectionTitle: section.title, score, maxScore };
+    });
 
-  if (!currentSection || !currentQuestion) {
-    return (
-      <Container maxWidth="md" sx={{ mt: 4 }}>
-        <Alert severity="error">
-          Ошибка при загрузке вопросов
-        </Alert>
-      </Container>
-    );
-  }
+    const totalScore = sectionScores.reduce((sum, s) => sum + s.score, 0);
 
-  const progress = (
-    (quizState.currentSection * currentSection.questions.length + quizState.currentQuestion + 1) /
-    (quizState.sections.length * currentSection.questions.length)
-  ) * 100;
+    return {
+      totalScore,
+      sectionScores,
+      detailedAnswers: answers
+    };
+  };
+
+  if (loading) return <LinearProgress />;
+  if (error) return <Typography color="error">{error}</Typography>;
+  if (!currentSection || !currentQuestion) return null;
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+    <Container maxWidth="md">
+      <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+        <Box sx={{ mb: 2 }}>
+          <LinearProgress 
+            variant="determinate" 
+            value={(answeredQuestions / totalQuestions) * 100} 
+          />
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            Вопрос {answeredQuestions + 1} из {totalQuestions}
+          </Typography>
+        </Box>
 
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <LinearProgress 
-          variant="determinate" 
-          value={progress} 
-          sx={{ mb: 4 }} 
-        />
-
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h6" gutterBottom>
           {currentSection.title}
         </Typography>
 
-        <Typography variant="h6" sx={{ mb: 3 }}>
-          Вопрос {quizState.currentQuestion + 1} из {currentSection.questions.length}
-        </Typography>
-
-        <Typography variant="body1" sx={{ mb: 4 }}>
+        <Typography variant="body1" sx={{ mb: 3 }}>
           {currentQuestion.text}
         </Typography>
 
         <RadioGroup
-          value={quizState.answers[currentQuestion.id] || ''}
-          onChange={(e) => handleAnswer(e.target.value)}
+          value={selectedAnswer}
+          onChange={(e) => setSelectedAnswer(Number(e.target.value))}
         >
           {currentQuestion.answers.map((answer, index) => (
             <FormControlLabel
@@ -208,26 +150,22 @@ const Quiz = () => {
               value={index}
               control={<Radio />}
               label={answer.text}
-              sx={{ mb: 1 }}
             />
           ))}
         </RadioGroup>
 
-        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
-          <Button
-            variant="contained"
-            onClick={handleNext}
-            disabled={typeof quizState.answers[currentQuestion.id] === 'undefined'}
-          >
-            {quizState.currentSection === quizState.sections.length - 1 &&
-             quizState.currentQuestion === currentSection.questions.length - 1
-              ? 'Завершить тест'
-              : 'Следующий вопрос'}
-          </Button>
-        </Box>
+        <Button
+          variant="contained"
+          onClick={handleAnswer}
+          disabled={selectedAnswer === null}
+          sx={{ mt: 3 }}
+        >
+          {quizState.currentSection === sections.length - 1 &&
+           quizState.currentQuestion === currentSection.questions.length - 1
+            ? 'Завершить тест'
+            : 'Следующий вопрос'}
+        </Button>
       </Paper>
     </Container>
   );
-};
-
-export default Quiz;
+}
