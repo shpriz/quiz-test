@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { QuizResult } from '../models/QuizResult.js';
+import { Result } from '../models/Result.js';
 import { User } from '../models/User.js';
 import ExcelJS from 'exceljs';
 
@@ -21,7 +21,7 @@ export const login = async (request, reply) => {
 
 export const getResults = async (request, reply) => {
   try {
-    const results = await QuizResult.findAll({
+    const results = await Result.findAll({
       include: [User],
       order: [['createdAt', 'DESC']]
     });
@@ -33,7 +33,7 @@ export const getResults = async (request, reply) => {
 
 export const downloadResults = async (request, reply) => {
   try {
-    const results = await QuizResult.findAll({
+    const results = await Result.findAll({
       include: [User],
       order: [['createdAt', 'DESC']]
     });

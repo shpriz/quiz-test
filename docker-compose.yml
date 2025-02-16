@@ -32,9 +32,16 @@ services:
       MYSQL_USER: quiz_user
       MYSQL_PASSWORD: quiz_password
     volumes:
-      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - type: bind
+        source: ./backend/init.sql
+        target: /docker-entrypoint-initdb.d/init.sql
+        read_only: true
+      - mariadb_data:/var/lib/mysql
     networks:
       - app-network
+
+volumes:
+  mariadb_data:
 
 networks:
   app-network:
