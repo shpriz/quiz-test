@@ -8,31 +8,37 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    volumes:
+      - frontend_build:/app/dist
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
   nginx:
     image: nginx:alpine
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./frontend/nginx/conf.d:/etc/nginx/conf.d
-      - ./frontend/nginx/ssl:/etc/nginx/ssl
-      - ./frontend/dist:/usr/share/nginx/html
+      - frontend_build:/usr/share/nginx/html:ro
     depends_on:
-      - frontend
-      - backend
+      frontend:
+        condition: service_completed_successfully
+      backend:
+        condition: service_healthy
     networks:
       - app-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   backend:
     build: 
       context: ./backend
       dockerfile: Dockerfile
-    ports:
-      - "5000:5000"
     environment:
       - DB_HOST=mariadb
       - DB_PORT=3306
@@ -40,14 +46,20 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - JWT_SECRET=${JWT_SECRET}
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=5000
       - HOST=stomtest.nsmu.ru
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     networks:
       - app-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   mariadb:
     image: mariadb:10.5
@@ -57,17 +69,22 @@ services:
       - MYSQL_DATABASE=${DB_NAME}
       - MYSQL_USER=${DB_USER}
       - MYSQL_PASSWORD=${DB_PASSWORD}
-    ports:
-      - "3306:3306"
     networks:
       - app-network
     volumes:
       - mariadb_data:/var/lib/mysql
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 volumes:
   mariadb_data:
     name: quiz_db_data
+  frontend_build:
+    name: quiz_frontend_build
 
 networks:
   app-network:

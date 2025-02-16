@@ -1,10 +1,9 @@
 import axios from 'axios';
 import { Section, QuizResult, AdminCredentials, AdminAuthResponse, UserResult } from '../types/quiz';
 
-const BASE_URL = import.meta.env.VITE_API_URL || '/api';
-
+// Используем относительный путь
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
