@@ -1,4 +1,4 @@
-FROM node:20.11.0-alpine
+FROM node:23-alpine
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ RUN apk add --no-cache python3 make g++
 COPY package*.json ./
 
 # Устанавливаем зависимости
-RUN npm ci
+RUN npm install --production
 
 # Копируем исходный код
 COPY . .

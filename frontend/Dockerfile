@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20.11.0-alpine AS builder
+FROM node:23-alpine AS builder
 
 # Устанавливаем рабочую директорию
 WORKDIR /usr/src/app
