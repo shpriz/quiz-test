@@ -8,12 +8,13 @@ RUN apk add --no-cache python3 make g++
 # Копируем файлы package.json и package-lock.json
 COPY package*.json ./
 
-# Устанавливаем зависимости
-RUN npm install --production
+# Устанавливаем все зависимости (включая devDependencies)
+RUN npm install
 
 # Копируем исходный код
 COPY . .
 
 EXPOSE 5000
 
-CMD ["npm", "start"]
+# Ждем пока база данных запустится
+CMD ["sh", "-c", "sleep 10 && npm start"]

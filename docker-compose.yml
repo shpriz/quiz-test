@@ -9,6 +9,7 @@ services:
       - VITE_API_URL=http://stomtest.nsmu.ru/api
     networks:
       - app-network
+    restart: unless-stopped
 
   nginx:
     image: nginx:alpine
@@ -21,6 +22,7 @@ services:
       - backend
     networks:
       - app-network
+    restart: unless-stopped
 
   backend:
     build: 
@@ -42,6 +44,7 @@ services:
       - mariadb
     networks:
       - app-network
+    restart: unless-stopped
 
   mariadb:
     image: mariadb:11.6
@@ -57,10 +60,13 @@ services:
       - app-network
     volumes:
       - mariadb_data:/var/lib/mysql
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
 
 volumes:
   mariadb_data:
+    name: quiz_db_data
 
 networks:
   app-network:
+    name: quiz_network
     driver: bridge
