@@ -1,5 +1,11 @@
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
+import { Result } from './Result.js';
+import { SectionScore } from './SectionScore.js';
+import { DetailedAnswer } from './DetailedAnswer.js';
+import { Section } from './Section.js';
+import { Question } from './Question.js';
+import { Admin } from './Admin.js';
 
 dotenv.config();
 
@@ -16,23 +22,15 @@ const sequelize = new Sequelize(
   }
 );
 
-// Импортируем модели
-import { Result } from './Result.js';
-import { SectionScore } from './SectionScore.js';
-import { DetailedAnswer } from './DetailedAnswer.js';
-import { Section } from './Section.js';
-import { Question } from './Question.js';
-import { Admin } from './Admin.js';
-
 // Определяем связи между моделями
-Result.hasMany(SectionScore);
-SectionScore.belongsTo(Result);
+Result.hasMany(SectionScore, { foreignKey: 'resultId' });
+SectionScore.belongsTo(Result, { foreignKey: 'resultId' });
 
-SectionScore.hasMany(DetailedAnswer);
-DetailedAnswer.belongsTo(SectionScore);
+SectionScore.hasMany(DetailedAnswer, { foreignKey: 'sectionScoreId' });
+DetailedAnswer.belongsTo(SectionScore, { foreignKey: 'sectionScoreId' });
 
-Question.belongsTo(Section);
-Section.hasMany(Question);
+Question.belongsTo(Section, { foreignKey: 'sectionId' });
+Section.hasMany(Question, { foreignKey: 'sectionId' });
 
 // Экспортируем модели и sequelize
 export {

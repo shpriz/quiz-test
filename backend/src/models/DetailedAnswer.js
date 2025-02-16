@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
 
-const DetailedAnswer = sequelize.define('DetailedAnswer', {
+export const DetailedAnswer = sequelize.define('DetailedAnswer', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -22,10 +22,9 @@ const DetailedAnswer = sequelize.define('DetailedAnswer', {
     allowNull: false,
     field: 'question_text'
   },
-  answerText: {
+  answer: {
     type: DataTypes.TEXT,
-    allowNull: false,
-    field: 'answer_text'
+    allowNull: false
   },
   score: {
     type: DataTypes.INTEGER,
@@ -35,5 +34,3 @@ const DetailedAnswer = sequelize.define('DetailedAnswer', {
   tableName: 'detailed_answers',
   timestamps: false
 });
-
-export default DetailedAnswer;

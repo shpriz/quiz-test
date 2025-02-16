@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
 
-const SectionScore = sequelize.define('SectionScore', {
+export const SectionScore = sequelize.define('SectionScore', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -20,15 +20,8 @@ const SectionScore = sequelize.define('SectionScore', {
   score: {
     type: DataTypes.INTEGER,
     allowNull: false
-  },
-  maxScore: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    field: 'max_score'
   }
 }, {
   tableName: 'section_scores',
-  timestamps: false
+  timestamps: true
 });
-
-export default SectionScore;
