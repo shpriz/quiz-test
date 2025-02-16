@@ -2,13 +2,13 @@
 FROM node:23-alpine AS builder
 
 # Устанавливаем рабочую директорию
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Копируем package.json и package-lock.json
+# Копируем файлы проекта
 COPY package*.json ./
 
-# Устанавливаем зависимости
-RUN npm install --production
+# Устанавливаем все зависимости (включая devDependencies)
+RUN npm install
 
 # Копируем исходный код
 COPY . .
@@ -17,10 +17,10 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM nginx:stable-alpine
+FROM nginx:alpine
 
 # Копируем собранное приложение
-COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Копируем конфигурацию nginx
 COPY nginx/nginx.conf /etc/nginx/nginx.conf

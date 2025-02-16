@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:5173"
+    environment:
+      - VITE_API_URL=http://stomtest.nsmu.ru:5000
     networks:
       - app-network
 
