@@ -6,7 +6,7 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - VITE_API_URL=http://stomtest.nsmu.ru/api
+      - VITE_API_URL=http://stomtest.nsmu.ru:5000
     networks:
       - app-network
 
@@ -35,6 +35,9 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - JWT_SECRET=${JWT_SECRET}
+      - NODE_ENV=development
+      - PORT=5000
+      - HOST=stomtest.nsmu.ru
     depends_on:
       mariadb:
         condition: service_healthy
