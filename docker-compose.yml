@@ -4,9 +4,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "80:5173"
+      - "5173:5173"
     environment:
-      - VITE_API_URL=http://stomtest.nsmu.ru:5000
+      - VITE_API_URL=http://stomtest.nsmu.ru/api
     networks:
       - app-network
 
