@@ -4,14 +4,20 @@ FROM node:23-alpine AS builder
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем файлы проекта
+# Установка необходимых пакетов
+RUN apk add --no-cache python3 make g++
+
+# Копируем package.json и package-lock.json
 COPY package*.json ./
 
-# Устанавливаем все зависимости (включая devDependencies)
+# Устанавливаем зависимости
 RUN npm install
 
 # Копируем исходный код
 COPY . .
+
+# Проверяем наличие TypeScript
+RUN npm list typescript || npm install -D typescript
 
 # Создаем production build
 RUN npm run build
