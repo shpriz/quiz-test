@@ -11,6 +11,8 @@ services:
       - VITE_API_URL=http://localhost:5000
     networks:
       - app-network
+    depends_on:
+      - backend
 
   backend:
     build: 
@@ -21,12 +23,13 @@ services:
     environment:
       - DB_HOST=mariadb
       - DB_PORT=3306
-      - DB_USER=quiz_user
-      - DB_PASSWORD=quiz_password
+      - DB_USER=quizz_user
+      - DB_PASSWORD=quizz_password
       - DB_NAME=quizz_db
       - JWT_SECRET=your-secret-key-here
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -34,14 +37,24 @@ services:
     image: mariadb:10.5
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_ROOT_PASSWORD=admin123
       - MYSQL_DATABASE=quizz_db
-      - MYSQL_USER=quiz_user
-      - MYSQL_PASSWORD=quiz_password
+      - MYSQL_USER=quizz_user
+      - MYSQL_PASSWORD=quizz_password
     ports:
       - "3306:3306"
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "quizz_user", "--password=quizz_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+volumes:
+  mariadb_data:
 
 networks:
   app-network:
