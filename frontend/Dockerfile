@@ -11,7 +11,7 @@ RUN apk add --no-cache python3 make g++
 COPY package*.json ./
 
 # Устанавливаем зависимости
-RUN npm install
+RUN npm ci
 
 # Копируем исходный код
 COPY . .
@@ -29,7 +29,7 @@ COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
 
-# Указываем порт
+# Экспозим порт 5173
 EXPOSE 5173
 
 # Запускаем nginx
