@@ -9,6 +9,7 @@ export default defineConfig({
   server: {
     host: 'stomtest.nsmu.ru',
     port: 5173,
+    allowedHosts: ['stomtest.nsmu.ru'],
     proxy: {
       '/api': {
         target: process.env.VITE_API_URL || 'http://stomtest.nsmu.ru:5000',
