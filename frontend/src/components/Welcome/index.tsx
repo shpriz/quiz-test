@@ -1,132 +1,88 @@
-import { useState } from 'react';
+import { useState, FormEvent, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  Box,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions
-} from '@mui/material';
+import { Container, Card, Form, Button } from 'react-bootstrap';
 
 const Welcome = () => {
   const navigate = useNavigate();
+  const [showForm, setShowForm] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [error, setError] = useState('');
-  const [isWelcomeOpen, setIsWelcomeOpen] = useState(true);
 
-  const handleStart = () => {
-    if (!firstName.trim() || !lastName.trim()) {
-      setError('Пожалуйста, введите имя и фамилию');
-      return;
-    }
-
-    // Сохраняем данные пользователя в sessionStorage
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     sessionStorage.setItem('userData', JSON.stringify({ firstName, lastName }));
     navigate('/quiz');
   };
 
-  const handleWelcomeClose = () => {
-    setIsWelcomeOpen(false);
-  };
-
   return (
-    <>
-      <Dialog 
-        open={isWelcomeOpen} 
-        maxWidth="sm" 
-        fullWidth
-        onClose={(event, reason) => {
-          if (reason !== 'backdropClick') {
-            handleWelcomeClose();
-          }
-        }}
-      >
-        <DialogTitle>
-          <Typography variant="h4" align="center">
-            Добро пожаловать в тест по стоматологии!
-          </Typography>
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body1" paragraph>
-            Этот тест поможет оценить уровень осуществления гигиены полости рта, 
-            оказания стоматологической помощи и поддержания здорового образа жизни людей, 
-            проживающих в психоневрологических интернатах, в рамках сестринского ухода.
-          </Typography>
-          <Typography variant="body1" paragraph>
-            Инструкции:
-          </Typography>
-          <Typography component="div">
-            <ul>
-              <li>Тест состоит из нескольких разделов</li>
-              <li>В каждом разделе несколько вопросов</li>
-              <li>Выберите наиболее подходящий ответ для каждого вопроса</li>
-              <li>После завершения теста вы получите результаты</li>
-            </ul>
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            onClick={handleWelcomeClose}
-            fullWidth
-          >
-            Начать тест
-          </Button>
-        </DialogActions>
-      </Dialog>
+    <Container className="welcome-container">
+      <Card className="welcome-card">
+        <Card.Body>
+          <h2 className="text-center mb-4">Добро пожаловать!</h2>
+          
+          {!showForm ? (
+            <>
+              <div className="quiz-description">
+                <p>Тест состоит из пяти блоков. В каждом блоке необходимо выбрать один или несколько вариантов ответов на вопрос.</p>
+                
+                <p><span className="tooth-icon"></span> Первый блок содержит вопросы, направленные на уточнение информации об анкетируемом сотруднике, а именно: возрастная группа, пол, опыт работы и наличие пройденных курсов по повышению квалификации. Данная часть анкеты не подлежит оцениванию.</p>
+                
+                <p><span className="tooth-icon"></span> Второй блок оценивает уровень гигиены полости рта и возможности его улучшения у пациентов психоневрологического интерната, уточнение проблем, возникающих у них при чистке зубов.</p>
+                
+                <p><span className="tooth-icon"></span> Третий блок необходим для сбора информации о гигиене полости рта и помощи при ее проведении у лиц, находящихся в отделении милосердия.</p>
+                
+                <p><span className="tooth-icon"></span> Четвертый блок оценивает уровень и регулярность оказания стоматологической помощи пациентам, проживающим в условиях психоневрологического интерната.</p>
+                
+                <p><span className="tooth-icon"></span> Пятый блок оценивает образ жизни и питание пациентов психоневрологических интернатов.</p>
+                
+                <div className="rules">
+                  <p>При проведении опроса необходимо соблюдать все общие правила, которые способствуют созданию соответствующей атмосферы тестирования.</p>
+                  <p className="no-time-limit">Ограничений по времени не предусмотрено.</p>
+                </div>
+              </div>
+              <div className="text-center">
+                <button className="start-button" onClick={() => setShowForm(true)}>
+                  Начать тест
+                </button>
+              </div>
+            </>
+          ) : (
+            <Form onSubmit={handleSubmit} className="user-form">
+              <Form.Group className="mb-3">
+                <Form.Label>Имя</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={firstName}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
+                  required
+                  placeholder="Введите ваше имя"
+                />
+              </Form.Group>
 
-      <Container maxWidth="sm" sx={{ mt: 8 }}>
-        <Paper elevation={3} sx={{ p: 4 }}>
-          <Typography variant="h4" align="center" gutterBottom>
-            Регистрация
-          </Typography>
+              <Form.Group className="mb-4">
+                <Form.Label>Фамилия</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={lastName}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
+                  required
+                  placeholder="Введите вашу фамилию"
+                />
+              </Form.Group>
 
-          <Box component="form" sx={{ mt: 4 }}>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-
-            <TextField
-              fullWidth
-              label="Имя"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              margin="normal"
-              required
-            />
-
-            <TextField
-              fullWidth
-              label="Фамилия"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              margin="normal"
-              required
-            />
-
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              onClick={handleStart}
-              sx={{ mt: 3 }}
-            >
-              Начать тест
-            </Button>
-          </Box>
-        </Paper>
-      </Container>
-    </>
+              <div className="d-flex justify-content-between">
+                <Button variant="secondary" onClick={() => setShowForm(false)}>
+                  Назад
+                </Button>
+                <Button variant="primary" type="submit">
+                  Продолжить
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Card.Body>
+      </Card>
+    </Container>
   );
 };
 
