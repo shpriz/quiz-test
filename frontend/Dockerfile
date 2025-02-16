@@ -19,6 +19,5 @@ COPY . .
 # Проверяем наличие TypeScript
 RUN npm list typescript || npm install -D typescript
 
-EXPOSE 5173
-
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# Запускаем в dev режиме
+CMD ["npm", "run", "dev"]
