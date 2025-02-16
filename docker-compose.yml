@@ -1,12 +1,8 @@
-version: '3.8'
-
 services:
   frontend:
     build: 
       context: ./frontend
       dockerfile: Dockerfile
-    ports:
-      - "80:5173"
     environment:
       - VITE_API_URL=https://stomtest.nsmu.ru/api
     networks:
@@ -52,6 +48,29 @@ services:
       retries: 5
     volumes:
       - mariadb_data:/var/lib/mysql
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./frontend/nginx:/etc/nginx
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app-network
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
   mariadb_data:
