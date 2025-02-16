@@ -1,13 +1,40 @@
-import Result from './Result.js';
-import SectionScore from './SectionScore.js';
-import DetailedAnswer from './DetailedAnswer.js';
-import Admin from './Admin.js';
-import Section from './Section.js';
-import Question from './Question.js';
+import { Sequelize } from 'sequelize';
+import dotenv from 'dotenv';
 
+// Импортируем функции создания моделей
+import createResultModel from './Result.js';
+import createSectionScoreModel from './SectionScore.js';
+import createDetailedAnswerModel from './DetailedAnswer.js';
+import createAdminModel from './Admin.js';
+import createSectionModel from './Section.js';
+import createQuestionModel from './Question.js';
 
+dotenv.config();
 
-// Определение связей
+// Создаем инстанс Sequelize
+const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    dialect: 'mariadb',
+    dialectOptions: {
+      timezone: 'Etc/GMT-3',
+    },
+  }
+);
+
+// Инициализируем модели
+const Result = createResultModel(sequelize);
+const SectionScore = createSectionScoreModel(sequelize);
+const DetailedAnswer = createDetailedAnswerModel(sequelize);
+const Admin = createAdminModel(sequelize);
+const Section = createSectionModel(sequelize);
+const Question = createQuestionModel(sequelize);
+
+// Определяем связи
 Result.hasMany(SectionScore, {
   foreignKey: 'resultId',
   as: 'sectionScores'
@@ -27,11 +54,6 @@ Question.belongsTo(Section, {
   foreignKey: 'sectionId'
 });
 
-export {
-  Section,
-  Question,
-  // ... остальные экспорты ...
-};
 SectionScore.belongsTo(Result, {
   foreignKey: 'resultId'
 });
@@ -41,8 +63,11 @@ DetailedAnswer.belongsTo(Result, {
 });
 
 export {
+  sequelize,
   Result,
   SectionScore,
   DetailedAnswer,
-  Admin
+  Admin,
+  Section,
+  Question
 };
