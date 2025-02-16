@@ -5,16 +5,17 @@ dotenv.config();
 
 // Создаем инстанс Sequelize
 const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
+  process.env.DB_NAME || 'quizz_db',
+  process.env.DB_USER || 'quiz_user',
+  process.env.DB_PASSWORD || 'quiz_password',
   {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
+    host: process.env.DB_HOST || 'mariadb',
+    port: parseInt(process.env.DB_PORT || '3306'),
     dialect: 'mariadb',
     dialectOptions: {
       timezone: 'Etc/GMT-3',
     },
+    logging: console.log
   }
 );
 
@@ -24,6 +25,7 @@ import { SectionScore } from './SectionScore.js';
 import { DetailedAnswer } from './DetailedAnswer.js';
 import { Section } from './Section.js';
 import { Question } from './Question.js';
+import { Admin } from './Admin.js';
 
 // Определяем связи между моделями
 Result.hasMany(SectionScore, { as: 'sectionScores', foreignKey: 'resultId' });
@@ -42,5 +44,6 @@ export {
   DetailedAnswer,
   Section,
   Question,
+  Admin,
   sequelize
 };

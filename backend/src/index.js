@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { sequelize } from './models/index.js';
 import routes from './routes/index.js';
 import adminRoutes from './routes/admin.js';
+import { initializeAdmin } from './controllers/authController.js';
 
 dotenv.config();
 
@@ -39,6 +40,10 @@ try {
   // Синхронизация моделей
   await sequelize.sync({ alter: true });
   fastify.log.info('Database models synchronized.');
+
+  // Инициализация админа
+  await initializeAdmin();
+  fastify.log.info('Admin initialization completed.');
 } catch (error) {
   fastify.log.error('Unable to connect to the database:', error);
   process.exit(1);
