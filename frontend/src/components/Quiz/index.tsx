@@ -20,7 +20,8 @@ export default function Quiz() {
   const [quizState, setQuizState] = useState<QuizState>({
     currentSection: 0,
     currentQuestion: 0,
-    answers: []
+    answers: [],
+    sections: []  // Initialize sections as an empty array
   });
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,7 +40,11 @@ export default function Quiz() {
   const loadSections = async () => {
     try {
       const data = await fetchSections();
-      setSections(data);
+      setSections(data);  // Update sections state
+      setQuizState(prevState => ({
+        ...prevState,
+        sections: data  // Update sections in quizState after loading data
+      }));
       setLoading(false);
     } catch (err) {
       setError('Ошибка загрузки вопросов');

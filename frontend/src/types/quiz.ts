@@ -20,7 +20,7 @@ export interface QuizState {
   currentSection: number;
   currentQuestion: number;
   answers: DetailedAnswer[];
-  sections: Section[];
+  sections: Section[];  // Added the 'sections' property here
 }
 
 export interface SectionScore {
@@ -43,7 +43,7 @@ export interface QuizResult {
   detailedAnswers: DetailedAnswer[];
 }
 
-// Админские интерфейсы
+// Admin interfaces
 export interface AdminCredentials {
   username: string;
   password: string;
