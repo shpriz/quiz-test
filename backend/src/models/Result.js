@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
 
-const Result = sequelize.define('Result', {
+export const Result = sequelize.define('Result', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -34,5 +34,3 @@ const Result = sequelize.define('Result', {
   tableName: 'results',
   timestamps: false
 });
-
-export default Result;

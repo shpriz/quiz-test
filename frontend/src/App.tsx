@@ -6,8 +6,6 @@ import Quiz from './components/Quiz';
 import Results from './components/Results';
 import AdminLogin from './components/Admin/Login';
 import AdminDashboard from './components/Admin/Dashboard';
-import AdminUsers from './components/Admin/Login'
-import AdminQuestions from './components/Quiz';
 import { theme } from './theme';
 
 function App() {
@@ -20,8 +18,6 @@ function App() {
         <Route path="/results" element={<Results />} />
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<AdminUsers />} />
-        <Route path="/admin/questions" element={<AdminQuestions />} />
       </Routes>
     </ThemeProvider>
   );

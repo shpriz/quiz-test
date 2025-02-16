@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { Result } from '../models/Result.js';
-import { User } from '../models/User.js';
+import { Result, User } from '../models/index.js';
 import ExcelJS from 'exceljs';
 
 export const login = async (request, reply) => {
