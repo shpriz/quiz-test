@@ -12,9 +12,6 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST || 'mariadb',
     port: parseInt(process.env.DB_PORT || '3306'),
     dialect: 'mariadb',
-    dialectOptions: {
-      timezone: 'Etc/GMT-3',
-    },
     logging: console.log
   }
 );
@@ -28,14 +25,14 @@ import { Question } from './Question.js';
 import { Admin } from './Admin.js';
 
 // Определяем связи между моделями
-Result.hasMany(SectionScore, { as: 'sectionScores', foreignKey: 'resultId' });
-SectionScore.belongsTo(Result, { foreignKey: 'resultId' });
+Result.hasMany(SectionScore);
+SectionScore.belongsTo(Result);
 
-SectionScore.hasMany(DetailedAnswer, { as: 'answers', foreignKey: 'sectionScoreId' });
-DetailedAnswer.belongsTo(SectionScore, { foreignKey: 'sectionScoreId' });
+SectionScore.hasMany(DetailedAnswer);
+DetailedAnswer.belongsTo(SectionScore);
 
-Question.belongsTo(Section, { foreignKey: 'sectionId' });
-Section.hasMany(Question, { as: 'questions', foreignKey: 'sectionId' });
+Question.belongsTo(Section);
+Section.hasMany(Question);
 
 // Экспортируем модели и sequelize
 export {
