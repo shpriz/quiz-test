@@ -4,7 +4,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "5173:5173"
+      - "5173:80"
     depends_on:
       - backend
     environment:
@@ -35,28 +35,30 @@ services:
       - app-network
 
   mariadb:
-    image: mariadb:10.6
+    image: mariadb:10.6.16-focal
+    restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=admin123
-      - MYSQL_DATABASE=quizz_db
-      - MYSQL_USER=quizz_user
-      - MYSQL_PASSWORD=quizz_password123
-    expose:
-      - "3306"
+      MARIADB_ROOT_PASSWORD: admin123
+      MARIADB_DATABASE: quizz_db
+      MARIADB_USER: quizz_user
+      MARIADB_PASSWORD: quizz_password123
+    ports:
+      - "3306:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-p$$MARIADB_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
       - app-network
 
+volumes:
+  mariadb_data:
+    driver: local
+
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  mariadb_data:
