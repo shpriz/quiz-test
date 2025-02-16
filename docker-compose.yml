@@ -24,10 +24,9 @@ services:
       - DB_NAME=quizz_db
       - DB_USER=quizz_user
       - DB_PASSWORD=quizz_password123
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=5000
       - HOST=stomtest.nsmu.ru
-    restart: always
     depends_on:
       mariadb:
         condition: service_healthy
@@ -35,23 +34,29 @@ services:
       - app-network
 
   mariadb:
-    image: mariadb:latest
+    image: mariadb:10.5-focal
+    platform: linux/amd64
+    command: --max_allowed_packet=128M --sql_mode="NO_ENGINE_SUBSTITUTION"
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: admin123
       MYSQL_DATABASE: quizz_db
       MYSQL_USER: quizz_user
       MYSQL_PASSWORD: quizz_password123
-    ports:
-      - "3306:3306"
+      MYSQL_INITDB_SKIP_TZINFO: 1
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     networks:
       - app-network
 

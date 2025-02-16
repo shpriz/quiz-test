@@ -4,14 +4,11 @@ FROM node:20.11.0-alpine AS builder
 # Устанавливаем рабочую директорию
 WORKDIR /usr/src/app
 
-# Устанавливаем необходимые пакеты
-RUN apk add --no-cache python3 make g++
-
 # Копируем package.json и package-lock.json
 COPY package*.json ./
 
 # Устанавливаем зависимости
-RUN npm ci
+RUN npm install --production
 
 # Копируем исходный код
 COPY . .
@@ -29,8 +26,6 @@ COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
 
-# Экспозим порт 5173
 EXPOSE 5173
 
-# Запускаем nginx
 CMD ["nginx", "-g", "daemon off;"]
