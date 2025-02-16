@@ -2,14 +2,19 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import dotenv from 'dotenv';
-import { sequelize } from './config/database.js';
+import { sequelize } from './models/index.js';
 import routes from './routes/index.js';
 import adminRoutes from './routes/admin.js';
 
 dotenv.config();
 
 const fastify = Fastify({
-  logger: true
+  logger: {
+    level: 'info',
+    transport: {
+      target: 'pino-pretty'
+    }
+  }
 });
 
 // Регистрируем плагины
@@ -29,9 +34,11 @@ await fastify.register(adminRoutes, { prefix: '/api' });
 // Подключение к базе данных
 try {
   await sequelize.authenticate();
-  fastify.log.info('Database connected.');
-  await sequelize.sync();
-  fastify.log.info('Database synchronized.');
+  fastify.log.info('Database connected successfully.');
+  
+  // Синхронизация моделей
+  await sequelize.sync({ alter: true });
+  fastify.log.info('Database models synchronized.');
 } catch (error) {
   fastify.log.error('Unable to connect to the database:', error);
   process.exit(1);
@@ -39,9 +46,13 @@ try {
 
 const start = async () => {
   try {
-    await fastify.listen({ port: process.env.PORT || 5000, host: '0.0.0.0' });
+    const port = process.env.PORT || 5000;
+    const host = '0.0.0.0';
+    
+    await fastify.listen({ port, host });
+    fastify.log.info(`Server is running on http://${host}:${port}`);
   } catch (error) {
-    fastify.log.error(error);
+    fastify.log.error('Error starting server:', error);
     process.exit(1);
   }
 };
