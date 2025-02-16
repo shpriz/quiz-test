@@ -5,10 +5,8 @@ import dotenv from 'dotenv';
 import { Result } from './Result.js';
 import { SectionScore } from './SectionScore.js';
 import { DetailedAnswer } from './DetailedAnswer.js';
-import { Admin } from './Admin.js';
 import { Section } from './Section.js';
 import { Question } from './Question.js';
-import { User } from './User.js';
 
 dotenv.config();
 
@@ -19,6 +17,7 @@ const sequelize = new Sequelize(
   process.env.DB_PASSWORD,
   {
     host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
     dialect: 'mariadb',
     dialectOptions: {
       timezone: 'Etc/GMT-3',
@@ -26,14 +25,22 @@ const sequelize = new Sequelize(
   }
 );
 
+// Определяем связи между моделями
+Result.hasMany(SectionScore);
+SectionScore.belongsTo(Result);
+
+SectionScore.hasMany(DetailedAnswer);
+DetailedAnswer.belongsTo(SectionScore);
+
+Question.belongsTo(Section);
+Section.hasMany(Question);
+
 // Экспортируем модели
 export {
   Result,
   SectionScore,
   DetailedAnswer,
-  Admin,
   Section,
   Question,
-  User,
   sequelize
 };
