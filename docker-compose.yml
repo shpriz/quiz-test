@@ -30,10 +30,10 @@ services:
     environment:
       - DB_HOST=mariadb
       - DB_PORT=3306
-      - DB_USER=quizz_user
-      - DB_PASSWORD=quizz_password
-      - DB_NAME=quizz_db
-      - JWT_SECRET=your-secret-key-here
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_NAME=${MYSQL_DATABASE}
+      - JWT_SECRET=${JWT_SECRET}
     depends_on:
       mariadb:
         condition: service_healthy
@@ -44,16 +44,16 @@ services:
     image: mariadb:10.5
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=admin123
-      - MYSQL_DATABASE=quizz_db
-      - MYSQL_USER=quizz_user
-      - MYSQL_PASSWORD=quizz_password
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "quizz_user", "--password=quizz_password"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER}", "--password=${MYSQL_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
