@@ -4,18 +4,29 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     environment:
-      - VITE_API_URL=https://stomtest.nsmu.ru/api
+      - VITE_API_URL=http://stomtest.nsmu.ru/api
     networks:
       - app-network
     depends_on:
       - backend
 
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html
+      - ./frontend/nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app-network
+
   backend:
     build: 
       context: ./backend
       dockerfile: Dockerfile
-    ports:
-      - "5000:5000"
     environment:
       - DB_HOST=mariadb
       - DB_PORT=3306
@@ -48,29 +59,6 @@ services:
       retries: 5
     volumes:
       - mariadb_data:/var/lib/mysql
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./frontend/nginx:/etc/nginx
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - app-network
-
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
   mariadb_data:
