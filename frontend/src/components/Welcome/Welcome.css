@@ -1,0 +1,53 @@
+.welcome-container {
+  padding: 2rem;
+}
+
+.welcome-card {
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  border-radius: 16px;
+  border: none;
+}
+
+.quiz-description {
+  margin: 2rem 0;
+}
+
+.tooth-icon::before {
+  content: "🦷";
+  margin-right: 8px;
+}
+
+.rules {
+  background: rgba(0,0,0,0.03);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin: 2rem 0;
+}
+
+.no-time-limit {
+  color: #2196f3;
+  font-weight: 500;
+}
+
+.start-button {
+  background: #2196f3;
+  color: white;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  transition: all 0.2s;
+}
+
+.start-button:hover {
+  background: #1976d2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33,150,243,0.3);
+}
+
+.user-form {
+  max-width: 400px;
+  margin: 0 auto;
+}

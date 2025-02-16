@@ -11,8 +11,7 @@ services:
     volumes:
       - frontend_build:/app/dist
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
 
   nginx:
     image: nginx:alpine
@@ -22,18 +21,11 @@ services:
       - ./frontend/nginx/conf.d:/etc/nginx/conf.d
       - frontend_build:/usr/share/nginx/html:ro
     depends_on:
-      frontend:
-        condition: service_completed_successfully
-      backend:
-        condition: service_healthy
+      - frontend
+      - backend
     networks:
       - app-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "nginx", "-t"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   backend:
     build: 
@@ -50,16 +42,10 @@ services:
       - PORT=5000
       - HOST=stomtest.nsmu.ru
     depends_on:
-      mariadb:
-        condition: service_healthy
+      - mariadb
     networks:
       - app-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   mariadb:
     image: mariadb:10.5
@@ -74,11 +60,6 @@ services:
     volumes:
       - mariadb_data:/var/lib/mysql
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
 volumes:
   mariadb_data:

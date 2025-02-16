@@ -1,6 +1,8 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Card, Form, Button } from 'react-bootstrap';
+import './Welcome.css';
+
 
 const Welcome = () => {
   const navigate = useNavigate();
