@@ -3,23 +3,19 @@ services:
     build: 
       context: ./frontend
       dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
     environment:
       - VITE_API_URL=http://stomtest.nsmu.ru/api
     networks:
       - app-network
-    depends_on:
-      - backend
 
   nginx:
     image: nginx:alpine
     ports:
       - "80:80"
     volumes:
-      - ./frontend/dist:/usr/share/nginx/html
       - ./frontend/nginx/conf.d:/etc/nginx/conf.d
-    depends_on:
-      - frontend
-      - backend
     networks:
       - app-network
 
@@ -27,13 +23,15 @@ services:
     build: 
       context: ./backend
       dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
     environment:
       - DB_HOST=mariadb
       - DB_PORT=3306
       - DB_USER=quiz_user
       - DB_PASSWORD=quiz_password
       - DB_NAME=quiz_db
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=stomtest-quiz-secret-key-2024
     depends_on:
       mariadb:
         condition: service_healthy
@@ -44,7 +42,7 @@ services:
     image: mariadb:10.5
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=admin123
       - MYSQL_DATABASE=quiz_db
       - MYSQL_USER=quiz_user
       - MYSQL_PASSWORD=quiz_password
