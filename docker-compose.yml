@@ -4,7 +4,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "5173:5173"
+      - "80:5173"
     environment:
       - VITE_API_URL=http://stomtest.nsmu.ru:5000
     networks:
@@ -13,7 +13,7 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"
+      - "80:5173"
     volumes:
       - ./frontend/nginx/conf.d:/etc/nginx/conf.d
     depends_on:
