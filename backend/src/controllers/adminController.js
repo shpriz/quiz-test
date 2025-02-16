@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { Result, User } from '../models/index.js';
+import { Result } from '../models/Result.js';
 import ExcelJS from 'exceljs';
 
 export const login = async (request, reply) => {
@@ -8,64 +8,61 @@ export const login = async (request, reply) => {
   // В реальном приложении эти данные должны быть в базе данных
   const adminPassword = await bcrypt.hash('admin123', 10);
   if (username === 'admin' && await bcrypt.compare(password, adminPassword)) {
-    const token = await reply.jwtSign({ 
-      username, 
-      role: 'admin' 
-    });
-    return { token, user: { username, role: 'admin' } };
+    const token = fastify.jwt.sign({ username });
+    return { token };
   }
 
-  reply.code(401).send({ error: 'Invalid credentials' });
+  return reply.code(401).send({ error: 'Invalid credentials' });
 };
 
 export const getResults = async (request, reply) => {
   try {
     const results = await Result.findAll({
-      include: [User],
       order: [['createdAt', 'DESC']]
     });
     return results;
   } catch (error) {
-    reply.code(500).send({ error: 'Failed to fetch results' });
+    request.log.error('Error in getResults:', error);
+    return reply.code(500).send({ error: 'Internal server error' });
   }
 };
 
 export const downloadResults = async (request, reply) => {
   try {
     const results = await Result.findAll({
-      include: [User],
       order: [['createdAt', 'DESC']]
     });
 
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Quiz Results');
+    const worksheet = workbook.addWorksheet('Results');
 
-    // Заголовки
+    // Добавляем заголовки
     worksheet.columns = [
-      { header: 'Дата', key: 'date' },
+      { header: 'ID', key: 'id' },
       { header: 'Имя', key: 'firstName' },
       { header: 'Фамилия', key: 'lastName' },
       { header: 'Общий балл', key: 'totalScore' },
-      { header: 'Процент', key: 'percentage' }
+      { header: 'Дата', key: 'createdAt' }
     ];
 
-    // Данные
+    // Добавляем данные
     results.forEach(result => {
-      const totalMaxScore = result.sectionScores.reduce((sum, s) => sum + s.maxScore, 0);
       worksheet.addRow({
-        date: result.createdAt,
-        firstName: result.User.firstName,
-        lastName: result.User.lastName,
+        id: result.id,
+        firstName: result.firstName,
+        lastName: result.lastName,
         totalScore: result.totalScore,
-        percentage: ((result.totalScore / totalMaxScore) * 100).toFixed(1) + '%'
+        createdAt: result.createdAt
       });
     });
 
+    // Отправляем файл
     reply.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    reply.header('Content-Disposition', 'attachment; filename=quiz-results.xlsx');
+    reply.header('Content-Disposition', 'attachment; filename=results.xlsx');
     
     return workbook.xlsx.write(reply.raw);
   } catch (error) {
-    reply.code(500).send({ error: 'Failed to generate Excel file' });
+    request.log.error('Error in downloadResults:', error);
+    return reply.code(500).send({ error: 'Internal server error' });
   }
 };

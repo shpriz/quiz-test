@@ -29,7 +29,9 @@ services:
       - app-network
 
   mariadb:
-    image: mariadb
+    image: mariadb:10.6.16
+    platform: linux/amd64
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
       - "3306:3306"
     environment:
@@ -38,13 +40,15 @@ services:
       MYSQL_USER: quiz_user
       MYSQL_PASSWORD: quiz_password
     volumes:
-      - type: bind
-        source: ./backend/init.sql
-        target: /docker-entrypoint-initdb.d/init.sql
-        read_only: true
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
       - mariadb_data:/var/lib/mysql
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mariadb_data:
