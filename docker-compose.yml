@@ -42,7 +42,7 @@ services:
       - app-network
 
   mariadb:
-    image: mariadb:10.5
+    image: mariadb:11.6
     restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
