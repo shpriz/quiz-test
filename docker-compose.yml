@@ -2,7 +2,7 @@ version: '3'
 
 services:
   frontend:
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
@@ -17,10 +17,8 @@ services:
     image: nginx:alpine
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./frontend/nginx/conf.d:/etc/nginx/conf.d
-      - ./frontend/nginx/ssl:/etc/nginx/ssl
     depends_on:
       - frontend
       - backend
@@ -29,7 +27,7 @@ services:
     restart: unless-stopped
 
   backend:
-    build: 
+    build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
@@ -74,3 +72,4 @@ networks:
   app-network:
     name: quiz_network
     driver: bridge
+
