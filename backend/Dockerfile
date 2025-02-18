@@ -14,16 +14,7 @@ RUN npm install --production
 # Копируем исходный код
 COPY . .
 
-# Создаем скрипт для проверки доступности базы данных
-RUN echo '#!/bin/sh\n\
-while ! nc -z mariadb 3306; do\n\
-  echo "Waiting for MariaDB..."\n\
-  sleep 1\n\
-done\n\
-echo "MariaDB is ready!"\n\
-exec npm start' > entrypoint.sh \
-    && chmod +x entrypoint.sh
-
 EXPOSE 5000
 
-CMD ["./entrypoint.sh"]
+# Запускаем напрямую через shell
+CMD sh -c 'while ! nc -z mariadb 3306; do echo "Waiting for MariaDB..."; sleep 1; done; echo "MariaDB is ready!"; npm start'
