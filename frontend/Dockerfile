@@ -1,8 +1,11 @@
 # Build stage
-FROM node:23-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
+
+# Установка необходимых пакетов
+RUN apk add --no-cache python3 make g++
 
 # Установка необходимых пакетов
 RUN apk add --no-cache python3 make g++
