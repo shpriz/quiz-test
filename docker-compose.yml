@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   frontend:
     build:
@@ -45,11 +43,6 @@ services:
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pQuiz123Root!"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - app-network
     restart: unless-stopped
