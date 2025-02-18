@@ -3,32 +3,33 @@ FROM node:23-alpine as build
 
 WORKDIR /app
 
-# Добавляем python и build tools
-RUN apk add --no-cache python3 make g++
+# Add necessary build tools and python
+RUN apk add --no-cache python3 make g++ git
 
-# Копируем package.json и package-lock.json
+# Copy package files
 COPY package*.json ./
 
-# Устанавливаем зависимости
-RUN npm install --legacy-peer-deps
+# Clear npm cache and install dependencies with specific flags
+RUN npm cache clean --force && \
+    npm install --legacy-peer-deps --no-audit --no-fund
 
-# Копируем исходный код
+# Copy source code
 COPY . .
 
-# Собираем приложение
+# Build application
 RUN npm run build
 
 # Production stage
 FROM nginx:alpine
 
-# Копируем конфигурацию nginx
+# Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Копируем собранное приложение из build stage
+# Copy built application from build stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Экспортируем порт 80
+# Expose port 80
 EXPOSE 80
 
-# Запускаем nginx
+# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
