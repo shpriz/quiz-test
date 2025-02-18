@@ -1,5 +1,5 @@
 # Build stage
-FROM node:23-alpine
+FROM node:23-alpine AS builder
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
@@ -11,14 +11,23 @@ RUN apk add --no-cache python3 make g++
 COPY package*.json ./
 
 # Устанавливаем зависимости
-RUN npm install
+RUN npm ci
 
 # Копируем исходный код
 COPY . .
 
-# Проверяем наличие TypeScript
-RUN npm list typescript || npm install -D typescript
+# Собираем приложение
+RUN npm run build
 
-EXPOSE 5173
+# Production stage
+FROM nginx:alpine
 
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# Копируем собранное приложение
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Копируем конфигурацию nginx
+COPY nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

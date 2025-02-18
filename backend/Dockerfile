@@ -2,14 +2,14 @@ FROM node:23-alpine
 
 WORKDIR /app
 
-# Install build dependencies and wait-for-it script
+# Install build dependencies and netcat for DB check
 RUN apk add --no-cache python3 make g++ netcat-openbsd
 
-# Копируем файлы package.json и package-lock.json
+# Копируем только package файлы для кэширования слоя с зависимостями
 COPY package*.json ./
 
-# Устанавливаем все зависимости
-RUN npm install
+# Устанавливаем только production зависимости
+RUN npm ci --only=production
 
 # Копируем исходный код
 COPY . .
@@ -17,14 +17,13 @@ COPY . .
 # Создаем скрипт для проверки доступности базы данных
 RUN echo '#!/bin/sh\n\
 while ! nc -z mariadb 3306; do\n\
-  echo "Waiting for MariaDB to be ready..."\n\
+  echo "Waiting for MariaDB..."\n\
   sleep 1\n\
 done\n\
 echo "MariaDB is ready!"\n\
-npm start' > /app/wait-for-db.sh
-
-RUN chmod +x /app/wait-for-db.sh
+exec npm start' > /app/docker-entrypoint.sh \
+    && chmod +x /app/docker-entrypoint.sh
 
 EXPOSE 5000
 
-CMD ["/app/wait-for-db.sh"]
+CMD ["/app/docker-entrypoint.sh"]
