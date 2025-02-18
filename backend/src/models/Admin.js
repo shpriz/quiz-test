@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from './index.js';
+import { sequelize } from '../db.js';
 import bcrypt from 'bcryptjs';
 
 export const Admin = sequelize.define('Admin', {

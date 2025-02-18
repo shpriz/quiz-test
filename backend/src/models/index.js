@@ -1,19 +1,13 @@
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
-import { Result } from './Result.js';
-import { SectionScore } from './SectionScore.js';
-import { DetailedAnswer } from './DetailedAnswer.js';
-import { Section } from './Section.js';
-import { Question } from './Question.js';
-import { Admin } from './Admin.js';
 
 dotenv.config();
 
 // Создаем инстанс Sequelize
-const sequelize = new Sequelize(
-  process.env.DB_NAME || 'quizz_db',
-  process.env.DB_USER || 'quiz_user',
-  process.env.DB_PASSWORD || 'quiz_password',
+export const sequelize = new Sequelize(
+  process.env.DB_NAME || 'quiz_db',
+  process.env.DB_USER || 'quiz_admin',
+  process.env.DB_PASSWORD || 'Quiz123Admin!',
   {
     host: process.env.DB_HOST || 'mariadb',
     port: parseInt(process.env.DB_PORT || '3306'),
@@ -22,23 +16,30 @@ const sequelize = new Sequelize(
   }
 );
 
-// Определяем связи между моделями
-Result.hasMany(SectionScore, { foreignKey: 'resultId' });
-SectionScore.belongsTo(Result, { foreignKey: 'resultId' });
+// Импортируем модели после создания sequelize
+import { Result } from './Result.js';
+import { SectionScore } from './SectionScore.js';
+import { DetailedAnswer } from './DetailedAnswer.js';
+import { Section } from './Section.js';
+import { Question } from './Question.js';
+import { Admin } from './Admin.js';
 
-SectionScore.hasMany(DetailedAnswer, { foreignKey: 'sectionScoreId' });
-DetailedAnswer.belongsTo(SectionScore, { foreignKey: 'sectionScoreId' });
+// Определяем ассоциации
+Result.hasMany(SectionScore);
+SectionScore.belongsTo(Result);
 
-Question.belongsTo(Section, { foreignKey: 'sectionId' });
-Section.hasMany(Question, { foreignKey: 'sectionId' });
+Result.hasMany(DetailedAnswer);
+DetailedAnswer.belongsTo(Result);
 
-// Экспортируем модели и sequelize
+Section.hasMany(Question);
+Question.belongsTo(Section);
+
+// Экспортируем модели
 export {
   Result,
   SectionScore,
   DetailedAnswer,
   Section,
   Question,
-  Admin,
-  sequelize
+  Admin
 };
