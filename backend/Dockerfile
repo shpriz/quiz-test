@@ -3,28 +3,29 @@ FROM node:23-alpine
 
 WORKDIR /app
 
-# Добавляем необходимые инструменты
+# Add necessary tools
 RUN apk add --no-cache python3 make g++ netcat-openbsd
 
-# Копируем package.json и package-lock.json
+# Copy package files
 COPY package*.json ./
 
-# Устанавливаем зависимости
-RUN npm install --legacy-peer-deps
+# Clear npm cache and install dependencies
+RUN npm cache clean --force && \
+    npm install --legacy-peer-deps --no-audit --no-fund
 
-# Копируем исходный код
+# Copy source code
 COPY . .
 
-# Создаем пользователя node
+# Create node user
 RUN chown -R node:node /app
 USER node
 
-# Экспортируем порт 5000
+# Expose port 5000
 EXPOSE 5000
 
-# Скрипт для ожидания MariaDB
+# Copy and prepare wait-for-it script
 COPY --chown=node:node wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
 
-# Запускаем приложение
+# Start application
 CMD ["/wait-for-it.sh", "db:3306", "--", "node", "src/server.js"]
