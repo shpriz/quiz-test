@@ -10,7 +10,7 @@ import {
   Alert,
   Box
 } from '@mui/material';
-import { adminLogin } from '../../api';
+import { auth } from '../../api';
 import { AdminCredentials } from '../../types/quiz';
 
 export default function AdminLogin() {
@@ -23,7 +23,7 @@ export default function AdminLogin() {
     e.preventDefault();
     try {
       const credentials: AdminCredentials = { username, password };
-      const response = await adminLogin(credentials);
+      const response = await auth.login(credentials);
       localStorage.setItem('adminToken', response.token);
       navigate('/admin/dashboard');
     } catch (err) {

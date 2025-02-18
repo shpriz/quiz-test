@@ -1,16 +1,13 @@
 # Build stage
-FROM node:23-alpine AS builder
+FROM node:23-alpine as build
 
 WORKDIR /app
-
-# Устанавливаем только необходимое
-RUN apk add --no-cache python3
 
 # Копируем package.json и package-lock.json
 COPY package*.json ./
 
-# Устанавливаем все зависимости (включая devDependencies для сборки)
-RUN npm install
+# Устанавливаем зависимости
+RUN npm ci
 
 # Копируем исходный код
 COPY . .
@@ -21,12 +18,14 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
-# Копируем собранное приложение
-COPY --from=builder /app/dist /usr/share/nginx/html
-
 # Копируем конфигурацию nginx
-COPY nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Копируем собранное приложение из build stage
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Экспортируем порт 80
 EXPOSE 80
 
+# Запускаем nginx
 CMD ["nginx", "-g", "daemon off;"]

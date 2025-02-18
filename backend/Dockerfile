@@ -1,20 +1,41 @@
-FROM node:22-alpine
+# Build stage
+FROM node:23-alpine as build
 
 WORKDIR /app
 
-# Install build dependencies and netcat for DB check
-RUN apk add --no-cache python3 make g++ netcat-openbsd
-
-# Копируем только package файлы для кэширования слоя с зависимостями
+# Копируем package.json и package-lock.json
 COPY package*.json ./
 
 # Устанавливаем зависимости
-RUN npm install --production
+RUN npm ci
 
 # Копируем исходный код
 COPY . .
 
+# Production stage
+FROM node:23-alpine
+
+WORKDIR /app
+
+# Копируем package.json и package-lock.json
+COPY package*.json ./
+
+# Устанавливаем только production зависимости
+RUN npm ci --only=production
+
+# Копируем собранное приложение из build stage
+COPY --from=build /app/src ./src
+
+# Создаем пользователя node
+RUN chown -R node:node /app
+USER node
+
+# Экспортируем порт 5000
 EXPOSE 5000
 
-# Запускаем напрямую через shell
-CMD sh -c 'while ! nc -z mariadb 3306; do echo "Waiting for MariaDB..."; sleep 1; done; echo "MariaDB is ready!"; npm start'
+# Скрипт для ожидания MariaDB
+COPY --chown=node:node wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
+
+# Запускаем приложение
+CMD ["/wait-for-it.sh", "db:3306", "--", "node", "src/server.js"]

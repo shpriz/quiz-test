@@ -16,25 +16,24 @@ export interface Section {
   questions: Question[];
 }
 
+export interface DetailedAnswer {
+  questionId: number;
+  selectedAnswer: number;
+  score: number;
+  sectionId: number;
+}
+
 export interface QuizState {
   currentSection: number;
   currentQuestion: number;
   answers: DetailedAnswer[];
-  sections: Section[];  // Added the 'sections' property here
+  sections: Section[];
 }
 
 export interface SectionScore {
   sectionTitle: string;
   score: number;
   maxScore: number;
-}
-
-export interface DetailedAnswer {
-  questionId: number;
-  questionText: string;
-  answerText: string;
-  score: number;
-  sectionTitle: string;
 }
 
 export interface QuizResult {
@@ -59,9 +58,10 @@ export interface AdminAuthResponse {
   user: AdminUser;
 }
 
-export interface UserResult extends QuizResult {
+export interface UserResult {
   id: number;
   firstName: string;
   lastName: string;
   createdAt: string;
+  result: QuizResult;
 }

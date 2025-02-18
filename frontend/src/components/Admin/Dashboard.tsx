@@ -15,7 +15,7 @@ import {
   CircularProgress,
   Alert
 } from '@mui/material';
-import { fetchResults, downloadResultsExcel } from '../../api';
+import { admin } from '../../api';
 import { UserResult } from '../../types/quiz';
 
 export default function AdminDashboard() {
@@ -36,7 +36,7 @@ export default function AdminDashboard() {
 
   const loadResults = async () => {
     try {
-      const data = await fetchResults();
+      const data = await admin.getResults();
       setResults(data);
     } catch (err) {
       setError('Ошибка загрузки результатов');
@@ -52,15 +52,18 @@ export default function AdminDashboard() {
 
   const handleDownload = async () => {
     try {
-      await downloadResultsExcel();
+      await admin.downloadReport();
     } catch (err) {
       setError('Ошибка скачивания файла');
     }
   };
 
   const calculatePercentage = (result: UserResult): string => {
-    const totalMaxScore = result.sectionScores.reduce((sum: number, section) => sum + section.maxScore, 0);
-    return ((result.totalScore / totalMaxScore) * 100).toFixed(1);
+    const totalMaxScore = result.result.sectionScores.reduce(
+      (sum, section) => sum + section.maxScore, 
+      0
+    );
+    return ((result.result.totalScore / totalMaxScore) * 100).toFixed(1);
   };
 
   if (loading) {
@@ -104,21 +107,29 @@ export default function AdminDashboard() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Дата</TableCell>
               <TableCell>Имя</TableCell>
               <TableCell>Фамилия</TableCell>
-              <TableCell align="right">Общий балл</TableCell>
-              <TableCell align="right">Процент</TableCell>
+              <TableCell>Дата</TableCell>
+              <TableCell>Результат</TableCell>
+              <TableCell>Процент</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {results.map((result) => (
               <TableRow key={result.id}>
-                <TableCell>{new Date(result.createdAt).toLocaleString('ru-RU')}</TableCell>
                 <TableCell>{result.firstName}</TableCell>
                 <TableCell>{result.lastName}</TableCell>
-                <TableCell align="right">{result.totalScore}</TableCell>
-                <TableCell align="right">{calculatePercentage(result)}%</TableCell>
+                <TableCell>
+                  {new Date(result.createdAt).toLocaleString('ru-RU')}
+                </TableCell>
+                <TableCell>
+                  {result.result.totalScore} / 
+                  {result.result.sectionScores.reduce(
+                    (sum, section) => sum + section.maxScore, 
+                    0
+                  )}
+                </TableCell>
+                <TableCell>{calculatePercentage(result)}%</TableCell>
               </TableRow>
             ))}
           </TableBody>
