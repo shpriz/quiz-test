@@ -1,8 +1,8 @@
 -- Создание базы данных, если она не существует
-CREATE DATABASE IF NOT EXISTS quizz_db;
+CREATE DATABASE IF NOT EXISTS quiz_db;
 
 -- Использование базы данных
-USE quizz_db;
+USE quiz_db;
 
 -- Создаем таблицы
 CREATE TABLE IF NOT EXISTS sections (

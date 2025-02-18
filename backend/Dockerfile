@@ -21,9 +21,9 @@ while ! nc -z mariadb 3306; do\n\
   sleep 1\n\
 done\n\
 echo "MariaDB is ready!"\n\
-exec npm start' > /app/docker-entrypoint.sh \
-    && chmod +x /app/docker-entrypoint.sh
+exec npm start' > entrypoint.sh \
+    && chmod +x entrypoint.sh
 
 EXPOSE 5000
 
-CMD ["/app/docker-entrypoint.sh"]
+CMD ["./entrypoint.sh"]
