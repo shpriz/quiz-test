@@ -6,18 +6,20 @@ WORKDIR /app
 # Add necessary build tools
 RUN apk add --no-cache python3 make g++
 
+# Install yarn
+RUN npm install -g yarn
+
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies with specific npm version
-RUN npm install -g npm@latest && \
-    npm install --legacy-peer-deps --production=false
+# Install dependencies
+RUN yarn install --network-timeout 1000000
 
 # Copy source code
 COPY . .
 
 # Build application
-RUN npm run build
+RUN yarn build
 
 # Production stage
 FROM nginx:alpine
