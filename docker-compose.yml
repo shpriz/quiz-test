@@ -3,8 +3,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    expose:
-      - "5173"
+    ports:
+      - "80:80"
     environment:
       - VITE_API_URL=/api
     depends_on:
@@ -17,8 +17,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    expose:
-      - "5000"
+    ports:
+      - "5000:5000"
     environment:
       - NODE_ENV=production
       - DB_HOST=db
@@ -44,8 +44,8 @@ services:
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    expose:
-      - "3306"
+    ports:
+      - "3306:3306"
     networks:
       - app-network
     restart: unless-stopped
