@@ -25,7 +25,7 @@ api.interceptors.request.use(
 
 // Интерцептор для обработки ошибок
 api.interceptors.response.use(
-  (response) => response,
+  (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
       // Если токен истек или невалиден, разлогиниваем пользователя
@@ -37,6 +37,9 @@ api.interceptors.response.use(
 );
 
 // API endpoints
+export const fetchSections = () => api.get('/sections');
+export const saveResult = (data) => api.post('/results', data);
+
 export const auth = {
   login: (credentials) => api.post('/auth/login', credentials),
   register: (userData) => api.post('/auth/register', userData),
@@ -44,7 +47,7 @@ export const auth = {
 
 export const quiz = {
   getQuestions: () => api.get('/questions'),
-  submitAnswers: (answers) => api.post('/submit', answers),
+  submitAnswers: (answers) => api.post('/answers', answers),
   getResults: (id) => api.get(`/results/${id}`),
 };
 
