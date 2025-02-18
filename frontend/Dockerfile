@@ -3,11 +3,14 @@ FROM node:23-alpine as build
 
 WORKDIR /app
 
+# Добавляем python и build tools
+RUN apk add --no-cache python3 make g++
+
 # Копируем package.json и package-lock.json
 COPY package*.json ./
 
 # Устанавливаем зависимости
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Копируем исходный код
 COPY . .

@@ -3,11 +3,14 @@ FROM node:23-alpine as build
 
 WORKDIR /app
 
+# Добавляем python и build tools
+RUN apk add --no-cache python3 make g++
+
 # Копируем package.json и package-lock.json
 COPY package*.json ./
 
 # Устанавливаем зависимости
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Копируем исходный код
 COPY . .
@@ -17,11 +20,14 @@ FROM node:23-alpine
 
 WORKDIR /app
 
+# Добавляем netcat для wait-for-it.sh
+RUN apk add --no-cache netcat-openbsd
+
 # Копируем package.json и package-lock.json
 COPY package*.json ./
 
 # Устанавливаем только production зависимости
-RUN npm i --only=production
+RUN npm install --only=production --legacy-peer-deps
 
 # Копируем собранное приложение из build stage
 COPY --from=build /app/src ./src
