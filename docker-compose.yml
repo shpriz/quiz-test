@@ -1,4 +1,6 @@
 version: '3.8'
+env_file:
+  - .env
 
 services:
   frontend:
@@ -44,7 +46,8 @@ services:
       - PORT=5000
       - HOST=stomtest.nsmu.ru
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     networks:
       - app-network
     restart: unless-stopped
@@ -52,13 +55,18 @@ services:
   mariadb:
     image: mariadb:10.5
     environment:
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${DB_NAME}
-      - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MARIADB_DATABASE=${DB_NAME}
+      - MARIADB_USER=${DB_USER}
+      - MARIADB_PASSWORD=${DB_PASSWORD}
     volumes:
       - ./backend/mariadb_data:/var/lib/mysql
       - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - app-network
     restart: unless-stopped
