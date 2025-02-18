@@ -1,6 +1,44 @@
-import { useState, FormEvent, ChangeEvent } from 'react';
+import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Card, Form, Button } from 'react-bootstrap';
+import { 
+  Container, 
+  Box, 
+  Card, 
+  CardContent, 
+  Typography, 
+  Button, 
+  TextField, 
+  Paper,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Fade
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import DentistryIcon from '@mui/icons-material/MedicalServices';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+
+const StyledCard = styled(Card)(({ theme }) => ({
+  maxWidth: 800,
+  margin: '0 auto',
+  marginTop: theme.spacing(4),
+  marginBottom: theme.spacing(4),
+  background: 'rgba(255, 255, 255, 0.9)',
+  backdropFilter: 'blur(10px)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+}));
+
+const StyledListItem = styled(ListItem)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+  background: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+  '&:hover': {
+    transform: 'translateX(4px)',
+    transition: 'transform 0.2s ease-in-out',
+  },
+}));
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -15,73 +53,123 @@ const Welcome = () => {
   };
 
   return (
-    <Container className="welcome-container">
-      <Card className="welcome-card">
-        <Card.Body>
-          <h2 className="text-center mb-4">Добро пожаловать!</h2>
+    <Container>
+      <StyledCard>
+        <CardContent>
+          <Typography variant="h1" align="center" gutterBottom sx={{ 
+            fontSize: '2.5rem', 
+            color: 'primary.main',
+            mb: 4 
+          }}>
+            Добро пожаловать!
+          </Typography>
           
           {!showForm ? (
-            <>
-              <div className="quiz-description">
-                <p>Тест состоит из пяти блоков. В каждом блоке необходимо выбрать один или несколько вариантов ответов на вопрос.</p>
-                
-                <p><span className="tooth-icon"></span> Первый блок содержит вопросы, направленные на уточнение информации об анкетируемом сотруднике, а именно: возрастная группа, пол, опыт работы и наличие пройденных курсов по повышению квалификации. Данная часть анкеты не подлежит оцениванию.</p>
-                
-                <p><span className="tooth-icon"></span> Второй блок оценивает уровень гигиены полости рта и возможности его улучшения у пациентов психоневрологического интерната, уточнение проблем, возникающих у них при чистке зубов.</p>
-                
-                <p><span className="tooth-icon"></span> Третий блок необходим для сбора информации о гигиене полости рта и помощи при ее проведении у лиц, находящихся в отделении милосердия.</p>
-                
-                <p><span className="tooth-icon"></span> Четвертый блок оценивает уровень и регулярность оказания стоматологической помощи пациентам, проживающим в условиях психоневрологического интерната.</p>
-                
-                <p><span className="tooth-icon"></span> Пятый блок оценивает образ жизни и питание пациентов психоневрологических интернатов.</p>
-                
-                <div className="rules">
-                  <p>При проведении опроса необходимо соблюдать все общие правила, которые способствуют созданию соответствующей атмосферы тестирования.</p>
-                  <p className="no-time-limit">Ограничений по времени не предусмотрено.</p>
-                </div>
-              </div>
-              <div className="text-center">
-                <button className="start-button" onClick={() => setShowForm(true)}>
-                  Начать тест
-                </button>
-              </div>
-            </>
+            <Fade in={!showForm}>
+              <Box>
+                <Typography variant="body1" paragraph>
+                  Тест состоит из пяти блоков. В каждом блоке необходимо выбрать один или несколько вариантов ответов на вопрос.
+                </Typography>
+
+                <List>
+                  <StyledListItem>
+                    <ListItemIcon>
+                      <DentistryIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Блок 1: Информация об анкетируемом"
+                      secondary="Возрастная группа, пол, опыт работы и наличие пройденных курсов по повышению квалификации. Данная часть анкеты не подлежит оцениванию."
+                    />
+                  </StyledListItem>
+
+                  <StyledListItem>
+                    <ListItemIcon>
+                      <DentistryIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Блок 2: Уровень гигиены полости рта"
+                      secondary="Оценка уровня гигиены полости рта и возможности его улучшения у пациентов психоневрологического интерната."
+                    />
+                  </StyledListItem>
+
+                  <StyledListItem>
+                    <ListItemIcon>
+                      <DentistryIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Блок 3: Гигиена в отделении милосердия"
+                      secondary="Сбор информации о гигиене полости рта и помощи при ее проведении у лиц, находящихся в отделении милосердия."
+                    />
+                  </StyledListItem>
+
+                  <StyledListItem>
+                    <ListItemIcon>
+                      <DentistryIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Блок 4: Профессиональные навыки"
+                      secondary="Оценка профессиональных навыков и знаний в области стоматологии."
+                    />
+                  </StyledListItem>
+                </List>
+
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                  <Button 
+                    variant="contained" 
+                    size="large"
+                    endIcon={<ArrowForwardIcon />}
+                    onClick={() => setShowForm(true)}
+                    sx={{ 
+                      minWidth: 200,
+                      py: 1.5
+                    }}
+                  >
+                    Начать тест
+                  </Button>
+                </Box>
+              </Box>
+            </Fade>
           ) : (
-            <Form onSubmit={handleSubmit} className="user-form">
-              <Form.Group className="mb-3">
-                <Form.Label>Имя</Form.Label>
-                <Form.Control
-                  type="text"
+            <Fade in={showForm}>
+              <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Имя"
+                  variant="outlined"
                   value={firstName}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
+                  onChange={(e) => setFirstName(e.target.value)}
                   required
-                  placeholder="Введите ваше имя"
+                  sx={{ mb: 2 }}
                 />
-              </Form.Group>
-
-              <Form.Group className="mb-4">
-                <Form.Label>Фамилия</Form.Label>
-                <Form.Control
-                  type="text"
+                <TextField
+                  fullWidth
+                  label="Фамилия"
+                  variant="outlined"
                   value={lastName}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
+                  onChange={(e) => setLastName(e.target.value)}
                   required
-                  placeholder="Введите вашу фамилию"
+                  sx={{ mb: 3 }}
                 />
-              </Form.Group>
-
-              <div className="d-flex justify-content-between">
-                <Button variant="secondary" onClick={() => setShowForm(false)}>
-                  Назад
-                </Button>
-                <Button variant="primary" type="submit">
-                  Продолжить
-                </Button>
-              </div>
-            </Form>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                  <Button 
+                    variant="outlined" 
+                    onClick={() => setShowForm(false)}
+                  >
+                    Назад
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    variant="contained"
+                    endIcon={<ArrowForwardIcon />}
+                  >
+                    Продолжить
+                  </Button>
+                </Box>
+              </Box>
+            </Fade>
           )}
-        </Card.Body>
-      </Card>
+        </CardContent>
+      </StyledCard>
     </Container>
   );
 };
