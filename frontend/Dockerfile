@@ -1,20 +1,16 @@
 # Build stage
 FROM node:22-alpine AS builder
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Установка необходимых пакетов
-RUN apk add --no-cache python3 make g++
+# Устанавливаем только необходимое
+RUN apk add --no-cache python3
 
-# Установка необходимых пакетов
-RUN apk add --no-cache python3 make g++
-
-# Копируем package.json и package-lock.json
+# Копируем package.json
 COPY package*.json ./
 
-# Устанавливаем зависимости
-RUN npm install
+# Устанавливаем только production зависимости
+RUN npm ci --only=production
 
 # Копируем исходный код
 COPY . .
@@ -23,7 +19,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM nginx:stable-alpine
+FROM nginx:alpine
 
 # Копируем собранное приложение
 COPY --from=builder /app/dist /usr/share/nginx/html
