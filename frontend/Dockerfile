@@ -3,6 +3,9 @@ FROM node:23-alpine AS build
 
 WORKDIR /app
 
+# Add necessary build tools
+RUN apk add --no-cache python3 make g++
+
 # Copy package files
 COPY package*.json ./
 
@@ -17,7 +20,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM nginx:stable-alpine
+FROM nginx:alpine
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
