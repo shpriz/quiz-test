@@ -6,11 +6,11 @@ WORKDIR /app
 # Устанавливаем только необходимое
 RUN apk add --no-cache python3
 
-# Копируем package.json
+# Копируем package.json и package-lock.json
 COPY package*.json ./
 
-# Устанавливаем только production зависимости
-RUN npm ci --only=production
+# Устанавливаем все зависимости (включая devDependencies для сборки)
+RUN npm install
 
 # Копируем исходный код
 COPY . .
