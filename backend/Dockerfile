@@ -8,8 +8,8 @@ RUN apk add --no-cache python3 make g++ netcat-openbsd
 # Копируем только package файлы для кэширования слоя с зависимостями
 COPY package*.json ./
 
-# Устанавливаем только production зависимости
-RUN npm ci --only=production
+# Устанавливаем зависимости
+RUN npm install --production
 
 # Копируем исходный код
 COPY . .
