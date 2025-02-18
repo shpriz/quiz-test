@@ -5,26 +5,12 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    expose:
-      - "5173"
-    environment:
-      - VITE_API_URL=/api
-    networks:
-      - app-network
-    restart: unless-stopped
-
-  nginx:
-    image: nginx:alpine
     ports:
       - "80:80"
-    volumes:
-      - ./frontend/nginx/conf.d:/etc/nginx/conf.d
-      - ./frontend/dist:/usr/share/nginx/html
-    depends_on:
-      - frontend
-      - backend
     networks:
       - app-network
+    depends_on:
+      - backend
     restart: unless-stopped
 
   backend:
@@ -57,7 +43,7 @@ services:
       - MARIADB_USER=quiz_admin
       - MARIADB_PASSWORD=Quiz123Admin!
     volumes:
-      - ./backend/mariadb_data:/var/lib/mysql
+      - mariadb_data:/var/lib/mysql
       - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pQuiz123Root!"]
@@ -71,3 +57,6 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  mariadb_data:
