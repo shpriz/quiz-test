@@ -9,9 +9,9 @@ RUN apk add --no-cache python3 make g++ netcat-openbsd
 # Copy package files
 COPY package*.json ./
 
-# Clear npm cache and install dependencies
-RUN npm cache clean --force && \
-    npm install --legacy-peer-deps --no-audit --no-fund
+# Install dependencies with specific npm version
+RUN npm install -g npm@latest && \
+    npm install --legacy-peer-deps --production=false
 
 # Copy source code
 COPY . .
